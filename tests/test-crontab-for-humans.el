@@ -12,6 +12,25 @@
   (load-file path))
 
 
+
+(ert-deftest test-time ()
+  (should (equal (cfh--time "*" "*") "every minute"))
+  (should (equal (cfh--time "1" "*") "minute 1"))
+  (should (equal (cfh--time "5" "4") "04:05")))
+
+(ert-deftest test-day-of-week ()
+  (should (equal (cfh--day-of-week "*") nil))
+  (should (equal (cfh--day-of-week "2") "Tuesday"))
+  (should (equal (cfh--day-of-week "7") "Sunday")))
+
+(ert-deftest test-day-of-month ()
+  (should (equal (cfh--day-of-month "*") nil))
+  (should (equal (cfh--day-of-month "5") "day-of-month 5")))
+
+(ert-deftest test-month ()
+  (should (equal (cfh--month "*") nil))
+  (should (equal (cfh--month "8") "August")))
+
 (ert-deftest test-human-friendly-simple ()
   (should (equal (crontab-human-friendly "* * * * *")
                  "At every minute."))

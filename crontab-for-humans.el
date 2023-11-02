@@ -46,12 +46,7 @@
   :argument "--day-of-week="
   :reader #'transient-read-number-N0)
 
-;; (defun crontab--time (minute hour)
-;;   (if (equal minute "*")
-;;       "every minute"
-;;     (format "minute %s" minute)))
-
-(defun crontab--time (minute hour)
+(defun cfh--time (minute hour)
   (cond ((and (equal minute "*") (equal hour "*"))
          "every minute")
 
@@ -64,35 +59,21 @@
           (format "%02d" (string-to-number hour))
           (format "%02d" (string-to-number minute))))))
 
-;; (crontab--time "*" "*")
-;; (crontab--time "1" "*")
-;; (crontab--time "5" "4")
-
-(defun crontab--day-of-week (value)
+(defun cfh--day-of-week (value)
   (if (equal value "*")
       nil
     (calendar-day-name
      (if (equal value "7") 0 (string-to-number value)) nil t)))
 
-;; (crontab--day-of-week "*")
-;; (crontab--day-of-week "2")
-;; (crontab--day-of-week "7")
-
-(defun crontab--day-of-month (value)
+(defun cfh--day-of-month (value)
   (if (equal value "*")
       nil
     (format "day-of-month %s" value)))
 
-;; (crontab--day-of-month "*")
-;; (crontab--day-of-month "5")
-
-(defun crontab--month (value)
+(defun cfh--month (value)
   (if (equal value "*")
       nil
     (calendar-month-name (string-to-number value))))
-
-;; (crontab--month "*")
-;; (crontab--month "8")
 
 (defun crontab-human-friendly (entry)
   ;; This should work
@@ -107,10 +88,10 @@
          (day-of-week  (elt split 4)))
 
     ;; WIP
-    (let* ((time (crontab--time minute hour))
-           (day-of-week (crontab--day-of-week day-of-week))
-           (month (crontab--month month))
-           (day-of-month (crontab--day-of-month day-of-month)))
+    (let* ((time (cfh--time minute hour))
+           (day-of-week (cfh--day-of-week day-of-week))
+           (month (cfh--month month))
+           (day-of-month (cfh--day-of-month day-of-month)))
 
       ;; (format "At %s on %s." time day-of-week)
 
@@ -123,6 +104,11 @@
                 result))
 
              (result
+              (if day-of-month
+                  (string-join (list result " on " day-of-month))
+                result))
+
+             (result
               (if month
                   (string-join (list result " in " month))
                 result))
@@ -130,14 +116,7 @@
 
              (result (string-join (list result "."))))
 
-        result
-
-        )
-
-
-
-      )
-
+        result))
   ;; Proof that we can return dynamic value
   ;; and it will change in the transient window
   ;; (current-time-string)
@@ -148,6 +127,7 @@
 (crontab-human-friendly "5 4 * * 7")
 (crontab-human-friendly "5 0 * 8 *")
 (crontab-human-friendly "5 0 * 8 1")
+(crontab-human-friendly "15 14 1 * *")
 
 
 (transient-define-suffix crontab-foo (&optional args)
