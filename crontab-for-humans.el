@@ -46,18 +46,47 @@
   :argument "--day-of-week="
   :reader #'transient-read-number-N0)
 
+
+;; (defun cfh--minute (value)
+;;   (let* ((split (split-string value "-")))
+;;     (if (= (length split) 1)
+;;         (format "minute %s" value)
+;;       (format "every minute from %s through %s"
+;;               (elt split 0) (elt split 1)))))
+
+;; (defun cfh--hour (value)
+
+;;   )
+
+(defun cfh--is-number (value)
+  (string-match-p "^[0-9]+$" value))
+
+(defun cfh--is-range (value)
+  (< 1 (length (split-string value "-"))))
+
 (defun cfh--time (minute hour)
   (cond ((and (equal minute "*") (equal hour "*"))
          "every minute")
 
         ((equal hour "*")
-         (format "minute %s" minute))
+         (let* ((split (split-string minute "-")))
+           (if (= (length split) 1)
+               (format "minute %s" minute)
+             (format "every minute from %s through %s"
+                     (elt split 0) (elt split 1)))))
 
-        (t
+        ((and (cfh--is-number minute) (cfh--is-number hour))
          (format
           "%s:%s"
           (format "%02d" (string-to-number hour))
-          (format "%02d" (string-to-number minute))))))
+          (format "%02d" (string-to-number minute))))
+
+        (t
+         (let* ((split (split-string hour "-")))
+           (if (= (length split) 1)
+               (format "every minute past hour %s" (elt split 0))
+             (format "every minute past every hour from %s through %s"
+                     (elt split 0) (elt split 1)))))))
 
 (defun cfh--day-of-week (value)
   (if (equal value "*")

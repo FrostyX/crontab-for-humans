@@ -12,11 +12,16 @@
   (load-file path))
 
 
-
 (ert-deftest test-time ()
   (should (equal (cfh--time "*" "*") "every minute"))
   (should (equal (cfh--time "1" "*") "minute 1"))
-  (should (equal (cfh--time "5" "4") "04:05")))
+  (should (equal (cfh--time "5" "4") "04:05"))
+  (should (equal (cfh--time "*" "3") "every minute past hour 3"))
+  (should (equal (cfh--time "1-5" "*") "every minute from 1 through 5"))
+  (should (equal (cfh--time "*" "3-4")
+                 "every minute past every hour from 3 through 4"))
+  (should (equal (cfh--time "1-5" "3-4")
+                 "every minute from 1 through 5 past every hour from 3 through 4")))
 
 (ert-deftest test-day-of-week ()
   (should (equal (cfh--day-of-week "*") nil))
