@@ -46,18 +46,6 @@
   :argument "--day-of-week="
   :reader #'transient-read-number-N0)
 
-
-;; (defun cfh--minute (value)
-;;   (let* ((split (split-string value "-")))
-;;     (if (= (length split) 1)
-;;         (format "minute %s" value)
-;;       (format "every minute from %s through %s"
-;;               (elt split 0) (elt split 1)))))
-
-;; (defun cfh--hour (value)
-
-;;   )
-
 (defun cfh--is-number (value)
   (string-match-p "^[0-9]+$" value))
 
@@ -145,11 +133,7 @@
 
              (result (string-join (list result "."))))
 
-        result))
-  ;; Proof that we can return dynamic value
-  ;; and it will change in the transient window
-  ;; (current-time-string)
-  ))
+        result))))
 
 (crontab-human-friendly "* * * * *")
 (crontab-human-friendly "1 * * * *")
@@ -159,20 +143,26 @@
 (crontab-human-friendly "15 14 1 * *")
 
 
-(transient-define-suffix crontab-foo (&optional args)
-  (transient-arg-value "--minute=" (transient-args 'crontab)))
+(transient-define-suffix cfh--explain (&optional args)
+  :transient t
+  (interactive)
+  (message
+   (crontab-human-friendly
+    (string-join (list
+                  (cfh--value "--minute=" )
+                  (cfh--value "--hour=" )
+                  (cfh--value "--day-of-month=" )
+                  (cfh--value "--month=" )
+                  (cfh--value "--day-of-week=" ))
+                 " "))))
+
+(defun cfh--value (arg)
+  (or (transient-arg-value arg (transient-args 'crontab)) "*"))
 
 (transient-define-prefix crontab ()
-  ;; This is not ideal because for changing the value, one must have to do
-  ;; for example `-m' to reset the minute and then `-m' again to set its value
-  ;; TODO Use :init-value instead
-  ;; :value '("--minute=*"
-  ;;          "--hour=*"
-  ;;          "--day-of-month=*"
-  ;;          "--month=*"
-  ;;          "--day-of-week=*")
+  [ :description
+    "Crontab For Humans"
 
-  [ :description (lambda () (format "Crontab: %s\n" (crontab-human-friendly)))
     ["Custom"
      (crontab:--minute)
      (crontab:--hour)
@@ -186,10 +176,11 @@
      ("@w" "Weekly" customize-face)
      ("@d" "Daily" customize-face)
      ("@h" "Hourly" customize-face)
-     ("@r" "Reboot" customize-face)
+     ("@r" "Reboot" customize-face)]
 
-     ;; TODO Actions
-     ;; - Generate random values
-     ;; - Copy the string to clipboard
-     ;; - Write to buffer
+    ["Actions"
+     ("e" "Explain" cfh--explain)
+     ;; TODO Generate random values
+     ;; TODO Copy the string to clipboard
+     ;; TODO Write to buffer
      ]])
