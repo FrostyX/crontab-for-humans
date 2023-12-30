@@ -146,18 +146,46 @@
 (transient-define-suffix cfh--explain (&optional args)
   :transient t
   (interactive)
-  (message
-   (crontab-human-friendly
-    (string-join (list
-                  (cfh--value "--minute=" )
-                  (cfh--value "--hour=" )
-                  (cfh--value "--day-of-month=" )
-                  (cfh--value "--month=" )
-                  (cfh--value "--day-of-week=" ))
-                 " "))))
+  (message (crontab-human-friendly (cfh--crontab-string))))
 
-(defun cfh--value (arg)
+(transient-define-suffix cfh--clipboard (&optional args)
+  (interactive)
+  (cfh--save-to-clipboard (cfh--crontab-string)))
+
+(transient-define-suffix cfh--insert ()
+  (interactive)
+  (insert (cfh--crontab-string)))
+
+(transient-define-suffix cfh--random ()
+  :transient t
+  (interactive)
+  (progn
+    (cfh--set-value "--minute=" "1")
+    (cfh--set-value "--hour=" "2")
+    (cfh--set-value "--day-of-month=" "3")
+    (cfh--set-value "--month=" "4")
+    (cfh--set-value "--day-of-week=" "5")))
+
+(defun cfh--get-value (arg)
   (or (transient-arg-value arg (transient-args 'crontab)) "*"))
+
+(defun cfh--set-value (arg value)
+  (error "Not implemented"))
+
+(defun cfh--save-to-clipboard (value)
+  (with-temp-buffer
+    (insert value)
+    (clipboard-kill-region (point-min) (point-max))))
+
+(defun cfh--crontab-string ()
+  (string-join
+   (list
+    (cfh--get-value "--minute=")
+    (cfh--get-value "--hour=")
+    (cfh--get-value "--day-of-month=")
+    (cfh--get-value "--month=")
+    (cfh--get-value "--day-of-week="))
+   " "))
 
 (transient-define-prefix crontab ()
   [ :description
@@ -169,6 +197,7 @@
      (crontab:--day-of-month)
      (crontab:--month)
      (crontab:--day-of-week)]
+
     ["Preconfigured (non-standard)"
      ("@y" "Yearly" customize-group)
      ("@a" "Annually" customize-option)
@@ -180,7 +209,6 @@
 
     ["Actions"
      ("e" "Explain" cfh--explain)
-     ;; TODO Generate random values
-     ;; TODO Copy the string to clipboard
-     ;; TODO Write to buffer
-     ]])
+     ("c" "Copy to clipboard" cfh--clipboard)
+     ("i" "Insert to buffer" cfh--insert)
+     ("R" "Generate random values" cfh--random)]])
